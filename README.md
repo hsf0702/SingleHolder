@@ -10,7 +10,7 @@ SingleHolder——小巧的滑动返回库
 
 仿微信
 
-![image](http://img2.ph.126.net/KgXtvKaxRYP_HX8ZK1memg==/6632609281004935694.gif)
+<img src="http://img2.ph.126.net/KgXtvKaxRYP_HX8ZK1memg==/6632609281004935694.gif"/>
 
 仿酷安
 

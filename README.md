@@ -8,9 +8,13 @@ SingleHolder——小巧的滑动返回库
 
 由于个人能力不足，无法看懂and_swipeback的源码，所以并未对它进行复制式抄袭，仅仅是受到启发，代码全是个人书写，信不信由你们。
 
-仿微信![image](http://img2.ph.126.net/KgXtvKaxRYP_HX8ZK1memg==/6632609281004935694.gif)
+仿微信
 
-仿酷安![image](http://img0.ph.126.net/x1kEcqgcg5pn-e2LAfiT8w==/30680772481113204.gif)
+![image](http://img2.ph.126.net/KgXtvKaxRYP_HX8ZK1memg==/6632609281004935694.gif)
+
+仿酷安
+
+![image](http://img0.ph.126.net/x1kEcqgcg5pn-e2LAfiT8w==/30680772481113204.gif)
 
 优点：
 

@@ -10,11 +10,11 @@ SingleHolder——小巧的滑动返回库
 
 仿微信
 
-<img src="http://img2.ph.126.net/KgXtvKaxRYP_HX8ZK1memg==/6632609281004935694.gif"/>
+![image](https://github.com/Android-wheel-by-legend/SingleHolder/blob/master/snapshot/yidong.gif)
 
 仿酷安
 
-![image](http://img0.ph.126.net/x1kEcqgcg5pn-e2LAfiT8w==/30680772481113204.gif)
+![image](https://github.com/Android-wheel-by-legend/SingleHolder/blob/master/snapshot/shadow.gif)
 
 优点：
 

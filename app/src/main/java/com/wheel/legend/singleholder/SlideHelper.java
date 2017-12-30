@@ -51,6 +51,8 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
 
     private static int CLOSE=2000;
 
+    private List<Activity> activityList;//用于管理可以滑动的Activity
+
     /**
      * 获取屏幕宽度
      * @return
@@ -74,6 +76,9 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
      * @param activity
      */
     public void setSlideActivity(Activity activity){
+
+        this.activityList.add(activity);
+
         this.activity = activity;
 
         this.defaultSpan=TypedValue.applyDimension(
@@ -139,6 +144,7 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
             this.viewManager= ViewManager.getInstance();
             velocityTracker=VelocityTracker.obtain();
             scroller=new Scroller(application.getApplicationContext());
+            this.activityList=new ArrayList<>();
         }
 
     }
@@ -426,6 +432,8 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
 
             scroll=false;
 
+            resetActivity(this.activity);
+
         }
 
     }
@@ -586,7 +594,13 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
      * @param activity
      */
     public void resetActivity(Activity activity){
-        this.activity=activity;
+
+        this.activityList.remove(activity);
+        if (this.activityList.size()==0){
+            return;
+        }
+
+        this.activity=activityList.get(activityList.size()-1);
 
     }
 
@@ -645,7 +659,7 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
 //            Log.d("remove-size-->>>",activities.size()+"");
 
             //恢复持有
-            slideHelper.resetActivity(activities.get(activities.size()-1));
+//            slideHelper.resetActivity(activities.get(activities.size()-1));
 
 
         }

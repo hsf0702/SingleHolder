@@ -8,6 +8,8 @@ SingleHolder——小巧的滑动返回库
 
 由于个人能力不足，无法看懂and_swipeback的源码，所以并未对它进行复制式抄袭，仅仅是受到启发，代码全是个人书写，信不信由你们。
 
+解析教程：[打造一个一只手就能hold住手机的滑动返回库](https://www.legic.xyz/article/wheel-by-legend-singleholder)
+
 仿微信
 
 ![image](https://github.com/Android-wheel-by-legend/SingleHolder/blob/master/snapshot/yidong.gif)

@@ -27,7 +27,7 @@ import java.util.List;
  * Created by legend on 2017/11/23.
  */
 
-public class SlideHelper implements Application.ActivityLifecycleCallbacks{
+public class SlideHelper implements Application.ActivityLifecycleCallbacks {
 
     private Activity activity;
 
@@ -43,134 +43,92 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
 
     private VelocityTracker velocityTracker;
 
-    private Scroller scroller;
+    public boolean isScroll = false;
 
-    public boolean isScroll=false;
+    private static int OPEN = 1000;
 
-    private static int OPEN=1000;
-
-    private static int CLOSE=2000;
+    private static int CLOSE = 2000;
 
     private List<Activity> activityList;//用于管理可以滑动的Activity
 
     /**
      * 获取屏幕宽度
+     *
      * @return
      */
-    private int getWidth(){
-        int width=this.activity.getResources().getDisplayMetrics().widthPixels;
+    private int getWidth() {
+        int width = this.activity.getResources().getDisplayMetrics().widthPixels;
 
         return width;
 
     }
 
 
-
-    public static SlideHelper getInstance(){
+    public static SlideHelper getInstance() {
         return slideHelper;
     }
 
 
     /**
      * 设置
+     *
      * @param activity
      */
-    public void setSlideActivity(Activity activity){
+    public void setSlideActivity(Activity activity) {
 
         this.activityList.add(activity);
 
         this.activity = activity;
 
-        this.defaultSpan=TypedValue.applyDimension(
+        this.defaultSpan = TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 16,
                 activity.getResources().getDisplayMetrics());
 
-
-//        this.defaultSpan=activity.getResources().getDimension(R.dimen.defaultSpan);
-
-        this.viewGroup= (ViewGroup) this.activity.getWindow().getDecorView();
-
-//        Window v=activity.getWindow();
-//        WindowManager.LayoutParams windowParams =v.getAttributes();
-//        windowParams.dimAmount = 0.0f;
-//        v.setAttributes(windowParams);
-//
-//        v.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-//
-//        viewGroup.setBackgroundColor(Color.TRANSPARENT);
-
-
-
-
-
-//        ViewGroup lin= (ViewGroup) viewGroup.getChildAt(0);
-
-//        lin.setBackgroundColor(Color.TRANSPARENT);
-
-//        Log.d("count-->>",f.getChildCount()+"");
-//        Log.d("view1-->>",viewGroup.getChildAt(0).toString());
-//        Log.d("view2-->>",viewGroup.getChildAt(1).toString());
-
+        this.viewGroup = (ViewGroup) this.activity.getWindow().getDecorView();
         slideView(viewGroup.getChildAt(0));//设置可滑动view
-
-//        Log.d("count-->>>",viewGroup.getChildCount()+"");
-
-//        this.viewManager.addViewAtContent(this.activity);
-
-//        viewGroup.addView(view,0);//添加背景view
-//
-//        FrameLayout.LayoutParams layoutParams= (FrameLayout.LayoutParams) viewGroup.getChildAt(0).getLayoutParams();
-//
-//        layoutParams.topMargin=viewGroup.getChildAt(2).getHeight();
-//
-//        viewGroup.getChildAt(0).setLayoutParams(layoutParams);
-
 
     }
 
     //交给manager处理显示view
-    private void addToManager(){
+    private void addToManager() {
         this.viewManager.addViewAtContent(this.activity);
-        if (!isScroll){
+        if (!isScroll) {
             addShadow();
         }
 //        addShadow();
     }
 
     private SlideHelper(Application application) {
-//        MyApplication myApplication = (MyApplication) application;
         application.registerActivityLifecycleCallbacks(this);
-        if (this.viewManager==null){
-            this.viewManager= ViewManager.getInstance();
-            velocityTracker=VelocityTracker.obtain();
-            scroller=new Scroller(application.getApplicationContext());
-            this.activityList=new ArrayList<>();
+        if (this.viewManager == null) {
+            this.viewManager = ViewManager.getInstance();
+            velocityTracker = VelocityTracker.obtain();
+            this.activityList = new ArrayList<>();
         }
-
     }
 
-    private void slideView(View view){
+    private void slideView(View view) {
 
-        if (view==null){
-            Log.w("waning!slideView-->>>"," the view is null!");
+        if (view == null) {
+            Log.w("waning!slideView-->>>", " the view is null!");
             return;
         }
         slideViewByHelper(view);
     }
 
     /**
-     *
      * 滑动view
+     *
      * @param view 传入view
      */
-    private void slideViewByHelper(final View view){
+    private void slideViewByHelper(final View view) {
 
         view.setOnTouchListener(new View.OnTouchListener() {
 
-            float dx,rx;
-            float dy=0f;
+            float dx, rx;
+            float dy = 0f;
 
-            boolean con=false;
+            boolean con = false;
 
 
             @Override
@@ -178,37 +136,37 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
 
                 velocityTracker.addMovement(event);
 
-                float speed=-1.0f;
+                float speed = -1.0f;
 
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        dx=event.getRawX();
+                        dx = event.getRawX();
 
-                        if (dx<=defaultSpan) {
+                        if (dx <= defaultSpan) {
 
                             addToManager();
 
-                            con=true;
+                            con = true;
 
                             return true;
                         }
 
                     case MotionEvent.ACTION_MOVE:
 
-                        if (dx<=defaultSpan&&con) {
+                        if (dx <= defaultSpan && con) {
 
                             rx = event.getRawX() - dx;
 
-                            if (rx<0){
-                                rx=0;
+                            if (rx < 0) {
+                                rx = 0;
                             }
 
-                            view.scrollTo((int) -rx,0);
+                            view.scrollTo((int) -rx, 0);
 
                             if (isScroll) {
                                 viewManager.changeViewLocation((int) rx);
 
-                            }else {
+                            } else {
                                 changeAlpha((int) rx);
                             }
 
@@ -226,24 +184,20 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
 
                             float endX = event.getRawX();
 
-                            float end=view.getLeft();
-
+                            float end = view.getLeft();
 
 
                             if (isHalfScreen(endX) || speed > 500) {
                                 //滑动距离过半或滑动速度超过限定值，向右滑动并退出当前Activity
-
                                 autoScrollToRight(view, endX);
 
                             } else {
                                 //滑动距离没过半且速度达不到要求
-
-                                Log.d("get-->>","goto!");
-                                autoScrollToLeft(view,endX);
+                                autoScrollToLeft(view, endX);
 
                             }
 
-                            con=false;//抬起手后更改变量，避免二次重复触摸
+                            con = false;//抬起手后更改变量，避免二次重复触摸
 
                             return true;
                         }
@@ -254,21 +208,21 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
         });
     }
 
-    private boolean scroll=true;
+    private boolean scroll = true;
 
     /**
      * 抬起手后自动滑向右端（关闭Activity操作）
      */
-    private void autoScrollToRight(final View view, final float currentX){
+    private void autoScrollToRight(final View view, final float currentX) {
 
-        scroll=true;
+        scroll = true;
 
-        final int sp=getWidth()/100;
+        final int sp = getWidth() / 100;
 
-        new Thread(){
-            int remain= (int) (getWidth()-currentX);
+        new Thread() {
+            int remain = (int) (getWidth() - currentX);
 
-            int current= (int) currentX;
+            int current = (int) currentX;
 
             @Override
             public void run() {
@@ -277,13 +231,13 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
                     while (scroll) {
 
                         sleep(1);//睡眠。保证速度不会太快导致内存溢出
-                        remain-=sp;
-                        current+=sp;
-                        ViewInfo info=new ViewInfo(view,current,sp,remain);
-                        openHandler.obtainMessage(10,info).sendToTarget();
+                        remain -= sp;
+                        current += sp;
+                        ViewInfo info = new ViewInfo(view, current, sp, remain);
+                        openHandler.obtainMessage(10, info).sendToTarget();
 
-                        if (remain<-sp*3){
-                            scroll=false;
+                        if (remain < -sp * 3) {
+                            scroll = false;
                         }
 
                     }
@@ -292,7 +246,6 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
                 }
             }
         }.start();
-
 
 
     }
@@ -301,33 +254,31 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
     /**
      * 平滑移动与最后退出，设置在主线程
      */
-    private Handler openHandler=new Handler(Looper.getMainLooper()){
+    private Handler openHandler = new Handler(Looper.getMainLooper()) {
 
         @Override
         public void handleMessage(Message msg) {
 
 
-            ViewInfo info= (ViewInfo) msg.obj;
+            ViewInfo info = (ViewInfo) msg.obj;
 
-            int sp=info.getSp();
+            int sp = info.getSp();
 
-            int distance= info.getCurrent();
+            int distance = info.getCurrent();
 
-            View view=info.getView();
-            view.scrollBy(-sp,0);
-
-//            Log.d("distance",distance+"");
+            View view = info.getView();
+            view.scrollBy(-sp, 0);
 
             //阴影也要随之改变
             if (!isScroll) {
                 changeAlpha(distance);
-            }else {
+            } else {
                 viewManager.changeViewLocation(distance);
 
             }
 
             //判断退出，一定要在主线程内。
-            if (info.getRemain()<-sp*3){
+            if (info.getRemain() < -sp * 3) {
                 close();
             }
 
@@ -336,41 +287,40 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
     };
 
 
-
     /**
      * 抬起手后自动滑向左端（还原Activity操作）
      * 1、将底部view还原至上一个Activity
      * 2、好像也没什么了
      */
-    private void autoScrollToLeft(final View view, final float currentX){
+    private void autoScrollToLeft(final View view, final float currentX) {
 
-        scroll=true;
+        scroll = true;
 
-        final int sp=getWidth()/100;
+        final int sp = getWidth() / 100;
 
-        new Thread(){
+        new Thread() {
 
-            int remain= (int) (getWidth()-currentX);
+            int remain = (int) (getWidth() - currentX);
 
-            int current= (int) currentX;
+            int current = (int) currentX;
 
             @Override
             public void run() {
 //               super.run();
                 try {
 
-                    Log.d("masg-->>",currentX+"");
+                    Log.d("masg-->>", currentX + "");
                     while (scroll) {
                         sleep(1);
 
-                        current-=sp;
-                        remain+=sp;
-                        ViewInfo info=new ViewInfo(view,current,sp,remain);
+                        current -= sp;
+                        remain += sp;
+                        ViewInfo info = new ViewInfo(view, current, sp, remain);
 
-                        closeHandler.obtainMessage(20,info).sendToTarget();
+                        closeHandler.obtainMessage(20, info).sendToTarget();
 
-                        if (current<sp){
-                            scroll=false;
+                        if (current < sp) {
+                            scroll = false;
                         }
 
                     }
@@ -382,26 +332,24 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
         }.start();
     }
 
-    private Handler closeHandler=new Handler(Looper.getMainLooper()) {
+    private Handler closeHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
 
 
-            ViewInfo info= (ViewInfo) msg.obj;
-            int sp=info.getSp();
-            View view=info.getView();
-            int current=info.getCurrent();
+            ViewInfo info = (ViewInfo) msg.obj;
+            int sp = info.getSp();
+            View view = info.getView();
+            int current = info.getCurrent();
 
-            Log.d("current-->>",current+"");
-
-            view.scrollBy(sp,0);
+            view.scrollBy(sp, 0);
 
             if (!isScroll) {
                 changeAlpha(current);
             }
 
-            if (current<sp){
-                view.scrollTo(0,0);
+            if (current < sp) {
+                view.scrollTo(0, 0);
                 resetView(CLOSE);
 
             }
@@ -410,27 +358,26 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
     };
 
 
-    private void recycleVelocity(){
+    private void recycleVelocity() {
 
-        if (velocityTracker!=null){
+        if (velocityTracker != null) {
             velocityTracker.recycle();
         }
     }
 
     /**
-     *
      * 结束Activity
      */
-    private void close(){
+    private void close() {
 
-        if (this.activity!=null){
+        if (this.activity != null) {
             resetView(OPEN);
 
             this.activity.finish();
 
-            this.activity.overridePendingTransition(0,R.anim.fade);
+            this.activity.overridePendingTransition(0, R.anim.fade);
 
-            scroll=false;
+            scroll = false;
 
             resetActivity(this.activity);
 
@@ -441,8 +388,8 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
     /**
      * 重置底部view
      */
-    private void resetView(int type){
-        switch (type){
+    private void resetView(int type) {
+        switch (type) {
             case 1000:
                 this.viewManager.resetView(this.activity);
 
@@ -456,16 +403,17 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
 
     /**
      * 判断是否超过屏幕二分之一
+     *
      * @param ex
      * @return
      */
-    private boolean isHalfScreen(float ex){
-        boolean isHalf=false;
+    private boolean isHalfScreen(float ex) {
+        boolean isHalf = false;
 
-        float screenWidth=this.activity.getResources().getDisplayMetrics().widthPixels;
+        float screenWidth = this.activity.getResources().getDisplayMetrics().widthPixels;
 
-        if(ex>=screenWidth/2){
-            isHalf=true;
+        if (ex >= screenWidth / 2) {
+            isHalf = true;
         }
 
         return isHalf;
@@ -475,74 +423,66 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
     /**
      * 添加阴影
      */
-    private void addShadow(){
+    private void addShadow() {
 
-        this.shadowView=new View(this.activity);
+        this.shadowView = new View(this.activity);
 
-        LinearLayout.LayoutParams layoutParams= new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
         this.shadowView.setLayoutParams(layoutParams);
 
         this.shadowView.setBackgroundColor(Color.parseColor("#c8000000"));
 
-        ViewGroup viewGroup= (ViewGroup) this.activity.getWindow().getDecorView();
+        ViewGroup viewGroup = (ViewGroup) this.activity.getWindow().getDecorView();
 
-        viewGroup.addView(this.shadowView,1);
+        viewGroup.addView(this.shadowView, 1);
     }
 
     /**
      * 改变透明度
+     *
      * @param distance
      */
-    private void changeAlpha(int distance){
+    private void changeAlpha(int distance) {
 
-//        Log.d("thread-->>",Thread.currentThread().getName());
-
-        if (this.shadowView==null){
+        if (this.shadowView == null) {
             return;
         }
 
-        int width=this.activity.getResources().getDisplayMetrics().widthPixels;
+        int width = this.activity.getResources().getDisplayMetrics().widthPixels;
 
-        int dis=width/200;
+        int dis = width / 200;
 
-        int space=  (width-distance);//平均分为200份
+        int space = (width - distance);//平均分为200份
 
         //???? --怎么写来着？
 
-        int speed=space/dis;
+        int speed = space / dis;
 
-        if (speed>200){
-            speed=200;
+        if (speed > 200) {
+            speed = 200;
         }
 
-        if (speed<16){
-            speed=16;
+        if (speed < 16) {
+            speed = 16;
         }
 
-        String dex=Integer.toHexString(speed);
+        String dex = Integer.toHexString(speed);
 
-
-
-        String alpha="#"+dex+"000000";
-
-//        System.out.println("space---->>"+alpha);
+        String alpha = "#" + dex + "000000";
 
         this.shadowView.setBackgroundColor(Color.parseColor(alpha));
 
     }
 
 
-
-
-
-
     /**
      * 在application里进行注册
+     *
      * @param application
      */
-    public static void setApplication(Application application){
-        if (slideHelper==null) {
+    public static void setApplication(Application application) {
+        if (slideHelper == null) {
             slideHelper = new SlideHelper(application);
         }
     }
@@ -551,7 +491,6 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
         this.viewManager.add(activity);
 
-//        Log.d("create->>>>",""+activity.toString());
     }
 
     @Override
@@ -582,35 +521,33 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
     @Override
     public void onActivityDestroyed(Activity activity) {
 
-//        Activity nextActivity=this.viewManager.resetActivity(this.activity);
         this.viewManager.remove(activity);
-//        resetActivity(nextActivity);
 
-        Log.d("destroy->>>>",""+activity.toString());
+        Log.d("destroy->>>>", "" + activity.toString());
     }
 
     /**
      * 移除Activity后，需要将上一个Activity作为持有Activity进行操作
+     *
      * @param activity
      */
-    public void resetActivity(Activity activity){
+    public void resetActivity(Activity activity) {
 
         this.activityList.remove(activity);
-        if (this.activityList.size()==0){
+        if (this.activityList.size() == 0) {
             return;
         }
 
-        this.activity=activityList.get(activityList.size()-1);
+        this.activity = activityList.get(activityList.size() - 1);
 
     }
 
 
     /**
-     *  管理类
-     *  管理Activity的数组，添加，删除，恢复持有Activity，以及重置view与动画效果
-     *
+     * 管理类
+     * 管理Activity的数组，添加，删除，恢复持有Activity，以及重置view与动画效果
      */
-    private static class ViewManager{
+    private static class ViewManager {
 
         private static List<Activity> activities;
 
@@ -622,25 +559,25 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
         }
 
         //初始化
-        public static ViewManager getInstance(){
+        public static ViewManager getInstance() {
 
-            if (activities==null){
+            if (activities == null) {
 
-                activities=new ArrayList<>();
+                activities = new ArrayList<>();
             }
 
-            if (viewManager==null){
+            if (viewManager == null) {
 
 
-                viewManager=new ViewManager();
+                viewManager = new ViewManager();
             }
 
             return viewManager;
         }
 
         //添加
-        public void add(Activity activity){
-            if (activity==null){
+        public void add(Activity activity) {
+            if (activity == null) {
                 return;
             }
 
@@ -651,8 +588,8 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
         }
 
         //移除与恢复持有
-        public void remove(Activity activity){
-            if (activity==null){
+        public void remove(Activity activity) {
+            if (activity == null) {
                 return;
             }
             activities.remove(activity);
@@ -666,171 +603,170 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
 
         /**
          * 传入当前Activity，绘制下一层的Activity
+         *
          * @param activity 当前Activity
          */
-        public void addViewAtContent(Activity activity){
-            Activity previousActivity=null;
+        public void addViewAtContent(Activity activity) {
+            Activity previousActivity = null;
 
             //判断null以及是否唯一，如是则返回不做处理
-            if (go()||activity==null){
+            if (go() || activity == null) {
                 return;
             }
 
-            for (int i=activities.size();i>=0;i--){
+            for (int i = activities.size(); i >= 0; i--) {
 
-                if (activity==activities.get(i-1)){
-                    previousActivity=activities.get(i-2);
+                if (activity == activities.get(i - 1)) {
+                    previousActivity = activities.get(i - 2);
                     break;
                 }
 
             }
 
-            if (previousActivity==null){
+            if (previousActivity == null) {
 
-                Log.w("waning!","the activity is not in the list!");
+                Log.w("waning!", "the activity is not in the list!");
 
                 return;
             }
 
             //获取上一个Activity的界面
-            ViewGroup viewGroup1= (ViewGroup) previousActivity.getWindow().getDecorView();
+            ViewGroup viewGroup1 = (ViewGroup) previousActivity.getWindow().getDecorView();
 
-            this.preView=viewGroup1.getChildAt(0);
+            this.preView = viewGroup1.getChildAt(0);
 
             viewGroup1.removeView(this.preView);//移除
 
 
             //获取当前Activity最底部ViewGroup
-            ViewGroup viewGroup= (ViewGroup) activity.getWindow().getDecorView();
+            ViewGroup viewGroup = (ViewGroup) activity.getWindow().getDecorView();
 
-            viewGroup.addView(this.preView,0);//
+            viewGroup.addView(this.preView, 0);//
 
         }
 
         /**
          * 重置Activity界面，避免关闭Activity后使得界面消失
          * 带动画效果，为向右滑到尽头后使Activity退出
+         *
          * @param activity 传入当前Activity
          */
-        public void resetView(Activity activity){
-            if (activity==null||go()){
-                Log.d("waning!","the activities is null or size is 0");
+        public void resetView(Activity activity) {
+            if (activity == null || go()) {
+                Log.d("waning!", "the activities is null or size is 0");
                 return;
             }
 
-            Activity previousActivity=null;
+            Activity previousActivity = null;
 
-            for (int i=activities.size();i>=0;i--){
+            for (int i = activities.size(); i >= 0; i--) {
 
-                if (activity==activities.get(i-1)){
-                    previousActivity=activities.get(i-2);
+                if (activity == activities.get(i - 1)) {
+                    previousActivity = activities.get(i - 2);
                     break;
                 }
 
             }
 
-            if (previousActivity==null){
+            if (previousActivity == null) {
                 return;
             }
 
-            ViewGroup viewGroup= (ViewGroup) activity.getWindow().getDecorView();
+            ViewGroup viewGroup = (ViewGroup) activity.getWindow().getDecorView();
 
-            View view=viewGroup.getChildAt(0);
+            View view = viewGroup.getChildAt(0);
 
-            ViewGroup previousViewGroup= (ViewGroup) previousActivity.getWindow().getDecorView();
+            ViewGroup previousViewGroup = (ViewGroup) previousActivity.getWindow().getDecorView();
 
             //动画，代替下面三行代码
-            setTransition(view,viewGroup,previousViewGroup);
+            setTransition(view, viewGroup, previousViewGroup);
 
-//            viewGroup.removeView(view);
-
-//            previousViewGroup.addView(view,0);
-//
-//            view.scrollTo(0,0);
         }
 
         /**
-         *
          * 手势未成功关闭Activity时，恢复上一个Activity的界面，避免用户按返回键后，上一个界面是空白的
          * 原理与重置view差不多，只是没有了动画效果，但是一定要摆正上一个view的位置，或是清除阴影
+         *
          * @param activity 当前所持Activity
          */
-        public void closeResetView(Activity activity){
-            if (activity==null||go()){
-                Log.d("waning!","the activities is null or size is 0");
+        public void closeResetView(Activity activity) {
+            if (activity == null || go()) {
+                Log.d("waning!", "the activities is null or size is 0");
                 return;
             }
 
-            Activity previousActivity=null;
+            Activity previousActivity = null;
 
-            for (int i=activities.size();i>=0;i--){
+            for (int i = activities.size(); i >= 0; i--) {
 
-                if (activity==activities.get(i-1)){
-                    previousActivity=activities.get(i-2);
+                if (activity == activities.get(i - 1)) {
+                    previousActivity = activities.get(i - 2);
                     break;
                 }
 
             }
 
-            if (previousActivity==null){
+            if (previousActivity == null) {
                 return;
             }
 
-            ViewGroup viewGroup= (ViewGroup) activity.getWindow().getDecorView();
+            ViewGroup viewGroup = (ViewGroup) activity.getWindow().getDecorView();
 
-            View view=viewGroup.getChildAt(0);
+            View view = viewGroup.getChildAt(0);
 
-            ViewGroup previousViewGroup= (ViewGroup) previousActivity.getWindow().getDecorView();
+            ViewGroup previousViewGroup = (ViewGroup) previousActivity.getWindow().getDecorView();
 
 //            setTransition(view,viewGroup,previousViewGroup);
 
             viewGroup.removeView(view);
 
-            previousViewGroup.addView(view,0);
+            previousViewGroup.addView(view, 0);
 
             if (slideHelper.isScroll) {
                 view.scrollTo(0, 0);//摆正位置
-            }else {
+            } else {
                 viewGroup.removeViewAt(0);//移除阴影
             }
 
         }
 
         //判断队列是否为空以及其长度
-        private boolean go(){
+        private boolean go() {
 
-            return activities==null||activities.size()==0|activities.size()==1;
+            return activities == null || activities.size() == 0 | activities.size() == 1;
         }
 
 
         /**
          * 改变底下view的位置，随着滑动而滑动
+         *
          * @param space
          */
-        public void changeViewLocation(int space){
+        public void changeViewLocation(int space) {
 
-            if (this.preView==null){
+            if (this.preView == null) {
                 return;
             }
-            if (space>slideHelper.getWidth()){
-                space=slideHelper.getWidth();
+            if (space > slideHelper.getWidth()) {
+                space = slideHelper.getWidth();
             }
 
-            int width=this.preView.getResources().getDisplayMetrics().widthPixels-space;
+            int width = this.preView.getResources().getDisplayMetrics().widthPixels - space;
 
-            this.preView.scrollTo((int) (width*0.5),0);
+            this.preView.scrollTo((int) (width * 0.5), 0);
 
         }
 
         /**
          * 移除view动画
-         * @param view 需要移除的view
+         *
+         * @param view       需要移除的view
          * @param viewGroup1 从viewGroup1移除
          * @param viewGroup2 添加到viewGroup2
          */
-        private void setTransition(final View view, final ViewGroup viewGroup1, final ViewGroup viewGroup2){
+        private void setTransition(final View view, final ViewGroup viewGroup1, final ViewGroup viewGroup2) {
 
-            ObjectAnimator animator=ObjectAnimator.ofFloat(view,"alpha",1.0f,1.0f).setDuration(100);
+            ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha", 1.0f, 1.0f).setDuration(100);
 
             animator.start();
 
@@ -844,7 +780,7 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
                         viewGroup1.removeViewAt(0);
                     }
 
-                    addView(view,viewGroup2);
+                    addView(view, viewGroup2);
 
                 }
             });
@@ -852,16 +788,17 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
 
         /**
          * 添加view
+         *
          * @param view
          * @param viewGroup
          */
-        private void addView(View view,ViewGroup viewGroup){
+        private void addView(View view, ViewGroup viewGroup) {
 
-            ObjectAnimator animator=ObjectAnimator.ofFloat(view,"alpha",1.0f,1.0f).setDuration(100);
+            ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha", 1.0f, 1.0f).setDuration(100);
 //
             animator.start();
 
-            viewGroup.addView(view,0);
+            viewGroup.addView(view, 0);
 
             //摆正view的位置
             if (slideHelper.isScroll) {
@@ -872,12 +809,12 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks{
 
     }
 
-    static class ViewInfo{
+    static class ViewInfo {
 
         View view;
-        int current=0;
-        int sp=0;
-        int remain=0;
+        int current = 0;
+        int sp = 0;
+        int remain = 0;
 
         public ViewInfo(View view, int current, int sp, int remain) {
             this.view = view;

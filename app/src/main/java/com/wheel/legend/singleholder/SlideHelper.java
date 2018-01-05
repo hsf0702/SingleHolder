@@ -459,15 +459,27 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks {
 
         int speed = space / dis;
 
+        //从200开始的透明度，可调
         if (speed > 200) {
             speed = 200;
         }
 
-        if (speed < 16) {
-            speed = 16;
+        //防止小于0
+        if (speed<0){
+            speed=0;
         }
+//        if (speed < 16) {
+//            speed = 16;
+//        }
+
 
         String dex = Integer.toHexString(speed);
+
+        //更改算法，实现真正透明
+        if (dex.length()==1){
+
+            dex="0"+dex;
+        }
 
         String alpha = "#" + dex + "000000";
 
@@ -648,7 +660,6 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks {
         /**
          * 重置Activity界面，避免关闭Activity后使得界面消失
          * 带动画效果，为向右滑到尽头后使Activity退出
-         *
          * @param activity 传入当前Activity
          */
         public void resetView(Activity activity) {

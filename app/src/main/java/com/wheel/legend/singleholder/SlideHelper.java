@@ -5,19 +5,21 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.Scroller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +87,18 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks {
                 activity.getResources().getDisplayMetrics());
 
         this.viewGroup = (ViewGroup) this.activity.getWindow().getDecorView();
-        slideView(viewGroup.getChildAt(0));//设置可滑动view
+
+        SlideParentFrameLayout parent=new SlideParentFrameLayout(activity);
+
+        View view=viewGroup.getChildAt(0);//获取viewgroup里的第一个view
+
+        viewGroup.removeView(view);//移除它
+
+        parent.addView(view,0);//放置在自己写的parent里
+
+        viewGroup.addView(parent,0);//将parent放入到这个viewgroup里
+
+        slideView(parent.getChildAt(0),parent);//设置可滑动view
 
     }
 
@@ -107,23 +120,29 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks {
         }
     }
 
-    private void slideView(View view) {
+    private void slideView(View view, ViewGroup parent) {
 
-        if (view == null) {
+        if (view == null||parent==null) {
             Log.w("waning!slideView-->>>", " the view is null!");
             return;
         }
-        slideViewByHelper(view);
+        slideViewByHelper(view,parent);
     }
+
 
     /**
      * 滑动view
      *
-     * @param view 传入view
+     * @param view 传入需要滑动的view
+     * @param parent 传入父布局，重写其touch事件
      */
-    private void slideViewByHelper(final View view) {
+    private void slideViewByHelper(final View view, ViewGroup parent) {
 
-        view.setOnTouchListener(new View.OnTouchListener() {
+        if (parent==null||view==null){
+            return;
+        }
+
+        parent.setOnTouchListener(new View.OnTouchListener() {
 
             float dx, rx;
             float dy = 0f;
@@ -435,7 +454,9 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks {
 
         ViewGroup viewGroup = (ViewGroup) this.activity.getWindow().getDecorView();
 
-        viewGroup.addView(this.shadowView, 1);
+        ViewGroup frame= (ViewGroup) viewGroup.getChildAt(0);
+
+        frame.addView(this.shadowView, 1);
     }
 
     /**
@@ -484,6 +505,12 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks {
         String alpha = "#" + dex + "000000";
 
         this.shadowView.setBackgroundColor(Color.parseColor(alpha));
+
+        ViewGroup.LayoutParams params=this.shadowView.getLayoutParams();
+
+        params.width=distance;
+
+        this.shadowView.setLayoutParams(params);
 
     }
 
@@ -653,7 +680,9 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks {
             //获取当前Activity最底部ViewGroup
             ViewGroup viewGroup = (ViewGroup) activity.getWindow().getDecorView();
 
-            viewGroup.addView(this.preView, 0);//
+            ViewGroup frame= (ViewGroup) viewGroup.getChildAt(0);
+
+            frame.addView(this.preView, 0);//
 
         }
 
@@ -685,12 +714,25 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks {
 
             ViewGroup viewGroup = (ViewGroup) activity.getWindow().getDecorView();
 
-            View view = viewGroup.getChildAt(0);
+            ViewGroup frame= (ViewGroup) viewGroup.getChildAt(0);
+
+            View view = frame.getChildAt(0);
 
             ViewGroup previousViewGroup = (ViewGroup) previousActivity.getWindow().getDecorView();
 
             //动画，代替下面三行代码
-            setTransition(view, viewGroup, previousViewGroup);
+            setTransition(view, frame, previousViewGroup);
+
+//            frame.removeView(view);
+//
+//            previousViewGroup.addView(view);
+//
+//            if (slideHelper.isScroll) {
+//                view.scrollTo(0, 0);//摆正位置
+//            } else {
+//                frame.removeViewAt(0);//移除阴影
+//            }
+
 
         }
 
@@ -721,22 +763,24 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks {
                 return;
             }
 
-            ViewGroup viewGroup = (ViewGroup) activity.getWindow().getDecorView();
+            ViewGroup viewGroup = (ViewGroup) activity.getWindow().getDecorView();//获取底部最外层
 
-            View view = viewGroup.getChildAt(0);
+            ViewGroup frame= (ViewGroup) viewGroup.getChildAt(0);//获取自定义的外层
 
-            ViewGroup previousViewGroup = (ViewGroup) previousActivity.getWindow().getDecorView();
+            View view = frame.getChildAt(0);//获取上一个界面的view
+
+            ViewGroup previousViewGroup = (ViewGroup) previousActivity.getWindow().getDecorView();//获取上一个界面的外层
 
 //            setTransition(view,viewGroup,previousViewGroup);
 
-            viewGroup.removeView(view);
+            frame.removeView(view);//移除上一个界面的view
 
-            previousViewGroup.addView(view, 0);
+            previousViewGroup.addView(view, 0);//添加回上一个界面
 
             if (slideHelper.isScroll) {
                 view.scrollTo(0, 0);//摆正位置
             } else {
-                viewGroup.removeViewAt(0);//移除阴影
+                frame.removeViewAt(0);//移除阴影
             }
 
         }
@@ -777,9 +821,9 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks {
          */
         private void setTransition(final View view, final ViewGroup viewGroup1, final ViewGroup viewGroup2) {
 
-            ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha", 1.0f, 1.0f).setDuration(100);
+            ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha", 1.0f, 1.0f).setDuration(200);
 
-            animator.start();
+
 
             //重点！！动画结束后立刻将view移除并添加到上一个Activity里，保证无缝跳转
             animator.addListener(new AnimatorListenerAdapter() {
@@ -795,6 +839,8 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks {
 
                 }
             });
+
+            animator.start();
         }
 
         /**
@@ -805,16 +851,28 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks {
          */
         private void addView(View view, ViewGroup viewGroup) {
 
-            ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha", 1.0f, 1.0f).setDuration(100);
+//            ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha", 1.0f, 1.0f).setDuration(100);
 //
-            animator.start();
+//
+//            animator.addListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationEnd(Animator animation) {
+////                    super.onAnimationStart(animation);
 
-            viewGroup.addView(view, 0);
+                    viewGroup.addView(view, 0);
 
-            //摆正view的位置
-            if (slideHelper.isScroll) {
-                view.scrollTo(0, 0);
-            }
+                    //摆正view的位置
+                    if (slideHelper.isScroll) {
+                        view.scrollTo(0, 0);
+                    }
+//
+//                }
+//            });
+//
+//
+//            animator.start();
+
+
 
         }
 
@@ -850,5 +908,61 @@ public class SlideHelper implements Application.ActivityLifecycleCallbacks {
             return remain;
         }
     }
+
+
+    interface HolderCallback{
+
+       
+    }
+
+
+    public class SlideParentFrameLayout extends FrameLayout {
+
+        private float defaultSpan;
+
+        public SlideParentFrameLayout(Context context) {
+            super(context);
+
+            this.defaultSpan = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics());
+
+        }
+
+        public SlideParentFrameLayout(Context context, AttributeSet attrs) {
+            super(context, attrs);
+            this.defaultSpan = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics());
+        }
+
+        public SlideParentFrameLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+            super(context, attrs, defStyleAttr);
+            this.defaultSpan = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics());
+        }
+
+
+        @Override
+        public boolean onInterceptTouchEvent(MotionEvent ev) {
+
+            float dx;
+
+            switch (ev.getAction()){
+
+                case MotionEvent.ACTION_DOWN:
+
+                    dx = ev.getRawX();
+
+                    if (dx <= defaultSpan) {
+                        return true;
+                    }
+                    break;
+            }
+
+            return super.onInterceptTouchEvent(ev);
+        }
+    }
+
+
+
 }
 
